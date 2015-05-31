@@ -2,6 +2,7 @@ __author__ = 'james.elkins'
 
 import configparser
 import os.path
+import sys
 
 configFilePath = os.path.dirname(os.path.realpath(__file__)) + '/config.cfg'
 
@@ -34,8 +35,8 @@ def get_config(section, key):
         config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.cfg')
         return config.get(section, key)
     except Exception as ex:
-        print(ex)
-        return None
+        print('Error with config. {}'.format(ex))
+        sys.exit()
 
 
 def get_location(location_key):

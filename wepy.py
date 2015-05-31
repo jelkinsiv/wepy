@@ -5,21 +5,12 @@ __license__ = "GPL"
 __version__ = "1.0.0"
 __maintainer__ = "James Elkins"
 __email__ = "jelkinsiv@gmail.com"
-__date__="2015/05/24/30"
+__date__ ="2015/05/24/30"
 
-import os
 import urllib.request
 import json
 import click
-import configparser
 import configManager
-
-#git the config file
-#config = configparser.ConfigParser()
-#config.read(os.path.dirname(os.path.realpath(__file__)) + '/_config.cfg')
-
-#key = config.get('key', 'wuKey')
-#weatherSymbols = {"sunny": "☀", "cloudy": "☁"}
 
 @click.command()
 @click.option('-b', '--beach', is_flag=True, help='View the weather at the beach')
@@ -38,42 +29,27 @@ def print_weather(beach, weekend, location, parents):
         weatherlocation = location
 
     #current conditions
-    conditionsRequest = urllib.request.urlopen('http://api.wunderground.com/api/' +
-                                               configManager.get_api_key() +
-                                               '/conditions/q/' + weatherlocation + '.json')
-    conditionsJsonString = conditionsRequest.read()
-    conditions = json.loads(conditionsJsonString.decode())
-
-    #current forecast
-    forecastRequest = urllib.request.urlopen('http://api.wunderground.com/api/' +
+    weather_request = urllib.request.urlopen('http://api.wunderground.com/api/' +
                                              configManager.get_api_key() +
-                                             '/forecast/q/' + weatherlocation + '.json')
+                                             '/geolookup/forecast/forecast10day/conditions/q/' +
+                                             weatherlocation + '.json')
+    weather_json_string = weather_request.read()
+    weather_json = json.loads(weather_json_string.decode())
 
-    forecastJsonString = forecastRequest.read()
-    forecast = json.loads(forecastJsonString.decode())
+    locationString = weather_json['current_observation']['display_location']['full']
+    currentTemperature = weather_json['current_observation']['temp_f']
+    weather = weather_json['current_observation']['weather']
+    humidity = weather_json['current_observation']['relative_humidity']
 
-    if weekend:
-        #10dayforcast
-        tenDayForecastRequest = urllib.request.urlopen('http://api.wunderground.com/api/' +
-                                                       configManager.get_api_key() +
-                                                       '/forecast10day/q/nc/' + weatherlocation +'.json')
-        tenDayForecastJsonString = tenDayForecastRequest.read()
-        tenDayForecast = json.loads(tenDayForecastJsonString.decode())
-
-    locationString = conditions['current_observation']['display_location']['full']
-    currentTemperature = conditions['current_observation']['temp_f']
-    weather = conditions['current_observation']['weather']
-    humidity = conditions['current_observation']['relative_humidity']
-
-    highTemperature = forecast['forecast']['simpleforecast']['forecastday'][0]['high']['fahrenheit']
-    lowTemperature = forecast['forecast']['simpleforecast']['forecastday'][0]['low']['fahrenheit']
-    rainChance = forecast['forecast']['simpleforecast']['forecastday'][0]['pop']
+    highTemperature = weather_json['forecast']['simpleforecast']['forecastday'][0]['high']['fahrenheit']
+    lowTemperature = weather_json['forecast']['simpleforecast']['forecastday'][0]['low']['fahrenheit']
+    rainChance = weather_json['forecast']['simpleforecast']['forecastday'][0]['pop']
 
     if weekend:
 
-        for day in range(0, len(tenDayForecast['forecast']['simpleforecast']['forecastday'])):
-            dayWeather = tenDayForecast['forecast']['simpleforecast']['forecastday'][day]
-            dayInfo = tenDayForecast['forecast']['txt_forecast']['forecastday'][day]
+        for day in range(0, len(weather_json['forecast']['simpleforecast']['forecastday'])):
+            dayWeather = weather_json['forecast']['simpleforecast']['forecastday'][day]
+            dayInfo = weather_json['forecast']['txt_forecast']['forecastday'][day]
             if (dayInfo["title"].split()[0] == "Saturday") or (dayInfo["title"].split()[0] == "Sunday"):
                 print('-------------------------------------------')
                 print(locationString + ' - ' + dayInfo['title'])
@@ -84,8 +60,7 @@ def print_weather(beach, weekend, location, parents):
         print(str(currentTemperature) + " F (" + str(highTemperature) + "F / " + str(lowTemperature) + "F)")
         print("Rain: " + str(rainChance) + "%     Humidity: " + humidity)
 
-    conditionsRequest.close()
-    forecastRequest.close()
+    weather_request.close()
 
 if __name__ == '__main__':
     if configManager.check_config():
