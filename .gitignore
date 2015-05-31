@@ -73,4 +73,4 @@ target/
 ##personal Stuff
 ideas.txt
 TODO.txt
-config.cfg
+*.cfg
