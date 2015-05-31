@@ -2,6 +2,7 @@
 A simple terminal weather app<br />
 <br />
 Requirements:<br />
-1.) install click - http://click.pocoo.org/<br />
-2.) Weather Underground Api key - http://www.wunderground.com/weather/api<br />
-3.) create config.cfg and a section called [key] with a entry called 'wukey' and add the weather underground api key
+  * click - http://click.pocoo.org/<br />
+  * Weather Underground Api key - http://www.wunderground.com/weather/api<br />
+<br /><br />
+Run the script once to generate the config file. Put the API key and base locations in the config file.
